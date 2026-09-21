@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Otofarma Device Companion — Project Presentation</title>
+<style>
+  :root{
+    --blue:#0f4c81;
+    --blue2:#1769aa;
+    --teal:#14b8a6;
+    --amber:#f59e0b;
+    --red:#dc2626;
+    --green:#16a34a;
+    --ink:#101828;
+    --muted:#667085;
+    --line:#e4e7ec;
+    --bg:#f7f9fc;
+    --card:#ffffff;
+    --navy:#0b2036;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#dfe5ec;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+  body{overflow:hidden}
+  .deck{height:100vh;width:100vw;display:flex;align-items:center;justify-content:center;padding:18px}
+  .slide{
+    width:min(94vw,1600px);
+    aspect-ratio:16/9;
+    background:var(--bg);
+    border-radius:18px;
+    box-shadow:0 24px 70px rgba(16,24,40,.24);
+    overflow:hidden;
+    position:relative;
+    display:none;
+  }
+  .slide.active{display:block}
+  .inner{height:100%;padding:5.2% 6.4%;position:relative}
+  .topline{position:absolute;left:0;top:0;width:100%;height:8px;background:linear-gradient(90deg,var(--blue),var(--teal))}
+  h1{font-size:clamp(34px,4.2vw,68px);line-height:1.03;margin:0 0 18px;letter-spacing:-.035em}
+  h2{font-size:clamp(27px,3.1vw,50px);line-height:1.08;margin:0 0 22px;letter-spacing:-.025em}
+  h3{font-size:clamp(18px,1.7vw,28px);margin:0 0 8px}
+  p{font-size:clamp(15px,1.28vw,22px);line-height:1.52;color:var(--muted);margin:0}
+  .eyebrow{font-size:clamp(11px,.9vw,15px);font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:14px}
+  .sub{font-size:clamp(17px,1.5vw,25px);max-width:900px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:stretch}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 6px 18px rgba(16,24,40,.05)}
+  .card p{font-size:clamp(13px,1.05vw,18px)}
+  .icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#eaf3fb;color:var(--blue);font-size:22px;font-weight:800;margin-bottom:16px}
+  .icon.teal{background:#e7fbf7;color:#0f766e}
+  .icon.amber{background:#fff5d8;color:#b45309}
+  .icon.red{background:#feecec;color:#b42318}
+  .hero{
+    background:linear-gradient(135deg,#0b2036 0%,#0f4c81 58%,#168d91 100%);
+    color:white;
+  }
+  .hero .inner{display:flex;flex-direction:column;justify-content:center}
+  .hero h1,.hero p{color:white}
+  .hero .sub{color:#d9ebf7}
+  .hero-badge{display:inline-flex;align-items:center;gap:10px;width:max-content;padding:10px 14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:999px;margin-bottom:22px;font-size:14px}
+  .hero-orb{position:absolute;border-radius:50%;filter:blur(0);opacity:.12;background:white}
+  .hero-orb.a{width:340px;height:340px;right:-80px;top:-70px}
+  .hero-orb.b{width:220px;height:220px;right:230px;bottom:-100px}
+  .flow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:28px}
+  .flow .node{flex:1;background:white;border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center;min-height:112px;display:flex;flex-direction:column;justify-content:center}
+  .flow .arrow{font-size:30px;color:#98a2b3;flex:0 0 auto}
+  .node strong{font-size:clamp(14px,1.1vw,20px);display:block;margin-bottom:6px}
+  .node span{font-size:clamp(12px,.9vw,16px);color:var(--muted)}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#ecf4fb;color:var(--blue);margin:3px}
+  .pill.green{background:#eaf8ee;color:#167c3a}
+  .pill.amber{background:#fff5d8;color:#a15c00}
+  .pill.gray{background:#f2f4f7;color:#475467}
+  .mock{background:#fff;border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(16,24,40,.08)}
+  .mockbar{height:42px;background:#f2f4f7;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px;padding:0 14px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#c8ced7}
+  .mockbody{display:grid;grid-template-columns:160px 1fr;min-height:360px}
+  .sidebar{background:var(--navy);padding:20px 14px;color:white}
+  .sideitem{padding:10px 12px;border-radius:9px;margin:4px 0;font-size:13px;color:#cbd6e2}
+  .sideitem.active{background:#163650;color:#fff;font-weight:700}
+  .content{padding:22px}
+  .minirow{display:grid;grid-template-columns:1.5fr 2.1fr .8fr 1fr;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #eef0f3;font-size:12px}
+  .minicard{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px;background:#fff}
+  .warn{border-left:5px solid var(--amber);background:#fff9e8;border-radius:12px;padding:16px 18px;color:#7a4a00}
+  .code{font-family:"SFMono-Regular",Consolas,monospace;background:#0d1726;color:#d7e9ff;padding:15px 18px;border-radius:12px;font-size:clamp(12px,.95vw,17px);line-height:1.55;white-space:pre-wrap}
+  .checklist{display:grid;gap:11px;margin-top:16px}
+  .check{display:flex;align-items:flex-start;gap:11px;font-size:clamp(14px,1.12vw,19px)}
+  .tick{width:24px;height:24px;border-radius:50%;background:#e7f8ee;color:var(--green);display:grid;place-items:center;font-weight:900;flex:0 0 auto}
+  .later .tick{background:#f2f4f7;color:#667085}
+  .label{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+  .arch{display:grid;grid-template-columns:1.05fr .22fr 1.2fr .22fr 1fr;align-items:center;gap:14px;margin-top:30px}
+  .archbox{background:white;border:1px solid var(--line);border-radius:18px;padding:22px;text-align:center}
+  .archbox.big{padding:28px}
+  .archarrow{text-align:center;font-size:32px;color:#98a2b3}
+  .footer{position:absolute;left:6.4%;right:6.4%;bottom:20px;display:flex;justify-content:space-between;align-items:center;color:#98a2b3;font-size:12px}
+  .controls{position:fixed;right:22px;bottom:20px;display:flex;gap:8px;z-index:99}
+  button{border:0;border-radius:12px;padding:10px 14px;background:#101828;color:white;cursor:pointer;font-weight:700;box-shadow:0 6px 18px rgba(16,24,40,.18)}
+  button.secondary{background:white;color:#344054;border:1px solid #d0d5dd;box-shadow:none}
+  .progress{position:fixed;left:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--teal));transition:width .25s ease;z-index:100}
+  .notes{
+    position:fixed;left:22px;bottom:20px;width:min(540px,48vw);max-height:34vh;overflow:auto;background:rgba(11,32,54,.96);color:#e9f1f8;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px 18px;display:none;z-index:100;box-shadow:0 12px 40px rgba(0,0,0,.25);direction:rtl;text-align:right;font-size:14px;line-height:1.75
+  }
+  .notes.show{display:block}
+  .section-title{margin-bottom:26px}
+  .mutedbox{background:#f9fafb;border:1px dashed #cbd2da;border-radius:14px;padding:17px}
+  .number{font-size:clamp(30px,3.2vw,52px);font-weight:800;color:var(--blue);line-height:1}
+  .two-col-wide{display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center}
+  .phone{width:245px;max-width:100%;margin:auto;background:#101828;border-radius:32px;padding:9px;box-shadow:0 16px 40px rgba(16,24,40,.2)}
+  .phonescreen{background:#f8fafc;border-radius:25px;min-height:440px;padding:18px}
+  .appcard{background:white;border:1px solid var(--line);border-radius:13px;padding:12px;margin:9px 0}
+  .apphead{display:flex;justify-content:space-between;align-items:center}
+  .smallbtn{display:inline-block;padding:6px 10px;border-radius:8px;background:var(--blue);color:white;font-size:10px;font-weight:700;margin-top:9px}
+  .smallbtn.alt{background:#eef4fa;color:var(--blue)}
+  .status{font-size:9px;font-weight:800;color:var(--green)}
+  @media(max-width:900px){
+    .grid3,.grid4{grid-template-columns:1fr 1fr}
+    .mockbody{grid-template-columns:120px 1fr}
+    .inner{padding:5%}
+  }
+  @media print{
+    body{overflow:visible;background:white}
+    .deck{display:block;height:auto;padding:0}
+    .slide{display:block!important;width:100vw;height:56.25vw;page-break-after:always;border-radius:0;box-shadow:none}
+    .controls,.progress,.notes{display:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- 1 -->
+<section class="slide hero active" data-note="این اسلاید فقط معرفی پروژه است. بگو هدف من ساخت یک سیستم کامل برای مدیریت اپ‌های دستگاه‌های اندرویدی اتوفارماست؛ شامل اپ اندروید، داشبورد وب و بک‌اند.">
+  <div class="hero-orb a"></div><div class="hero-orb b"></div>
+  <div class="inner">
+    <div class="hero-badge">Otofarma • Product Concept</div>
+    <h1>Device Companion<br/>Management Platform</h1>
+    <p class="sub">A simple Android companion app, a web admin dashboard, and a backend to manage applications, users, guides, warnings and support content.</p>
+    <div style="margin-top:34px;display:flex;gap:12px;flex-wrap:wrap">
+      <span class="pill" style="background:rgba(255,255,255,.14);color:white">Android App</span>
+      <span class="pill" style="background:rgba(255,255,255,.14);color:white">Web Dashboard</span>
+      <span class="pill" style="background:rgba(255,255,255,.14);color:white">Backend API</span>
+      <span class="pill" style="background:rgba(255,255,255,.14);color:white">Future AI Support</span>
+    </div>
+    <div class="footer" style="color:#c6d8e8"><span>Project Presentation</span><span>01</span></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-note="اینجا مشکل فعلی را توضیح بده: کاربر روی دستگاه چند اپ مختلف دارد، نمی‌داند کدام لازم است، چطور نصب یا اجرا کند و برای اتصال سنسور یا خطاها راهنمای واضح ندارد.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">The problem</div>
+    <h2>Too many separate apps, instructions and support steps</h2>
+    <div class="grid3" style="margin-top:34px">
+      <div class="card"><div class="icon">▦</div><h3>App discovery</h3><p>Users need to know which apps are required on each device and whether they are already installed.</p></div>
+      <div class="card"><div class="icon amber">!</div><h3>Setup & safety</h3><p>Sensor connection, OTG, startup order and important warnings must be easy to find.</p></div>
+      <div class="card"><div class="icon teal">?</div><h3>Support</h3><p>Guides, photos, videos and troubleshooting information are currently fragmented.</p></div>
+    </div>
+    <div class="warn" style="margin-top:30px"><strong>Goal:</strong> create one controlled entry point for apps, instructions and support.</div>
+    <div class="footer"><span>Why this project?</span><span>02</span></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-note="اینجا بگو پروژه سه بخش اصلی دارد و هر بخش کار مشخصی انجام می‌دهد. این اسلاید برای توضیح تصویر کلی سیستم است.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">Solution overview</div>
+    <h2>One platform, three connected parts</h2>
+    <div class="grid3" style="margin-top:32px">
+      <div class="card">
+        <div class="icon">A</div><h3>Android Companion App</h3>
+        <p>Shows allowed applications, detects installed packages, opens apps, links to installation and provides guides.</p>
+      </div>
+      <div class="card">
+        <div class="icon teal">W</div><h3>Web Admin Dashboard</h3>
+        <p>Administrators manage applications, users, roles, warnings, guides, images and videos.</p>
+      </div>
+      <div class="card">
+        <div class="icon amber">API</div><h3>Backend</h3>
+        <p>Stores configuration and content, controls access and delivers the correct data to the Android app.</p>
+      </div>
+    </div>
+    <div class="flow">
+      <div class="node"><strong>Admin edits content</strong><span>Web Dashboard</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><strong>Backend stores & serves</strong><span>API + Database</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><strong>User receives updates</strong><span>Android App</span></div>
+    </div>
+    <div class="footer"><span>System overview</span><span>03</span></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-note="این اسلاید خود اپ اندروید را توضیح می‌دهد. تاکید کن که اپ Launcher سیستم نیست، یک اپ معمولی اندرویدی است که اپ‌های مورد نیاز و راهنماها را مدیریت می‌کند.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">Android application</div>
+    <div class="two-col-wide">
+      <div>
+        <h2>A simple companion app for the device</h2>
+        <div class="checklist">
+          <div class="check"><div class="tick">✓</div><div><strong>Application list</strong><br><span style="color:var(--muted)">ECG, SpO₂, PDF Viewer, Remote Support, etc.</span></div></div>
+          <div class="check"><div class="tick">✓</div><div><strong>Installed / Not installed detection</strong><br><span style="color:var(--muted)">Based on Android package name.</span></div></div>
+          <div class="check"><div class="tick">✓</div><div><strong>Open or install</strong><br><span style="color:var(--muted)">Launch installed apps or guide the user to installation.</span></div></div>
+          <div class="check"><div class="tick">✓</div><div><strong>Guides & warnings</strong><br><span style="color:var(--muted)">Overview, Setup, Usage, Problems, photos and videos.</span></div></div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="phonescreen">
+          <div style="font-size:18px;font-weight:800;color:var(--blue)">Otofarma</div>
+          <div style="font-size:12px;color:var(--muted);margin:3px 0 14px">Device Companion</div>
+          <div class="appcard"><div class="apphead"><strong>ECG Monitor</strong><span class="status">INSTALLED</span></div><div><span class="smallbtn">Open</span> <span class="smallbtn alt">Guide</span></div></div>
+          <div class="appcard"><div class="apphead"><strong>SpO₂ Monitor</strong><span class="status">INSTALLED</span></div><div><span class="smallbtn">Open</span> <span class="smallbtn alt">Guide</span></div></div>
+          <div class="appcard"><div class="apphead"><strong>Remote Support</strong><span style="font-size:9px;font-weight:800;color:#b45309">NOT INSTALLED</span></div><div><span class="smallbtn">Install</span> <span class="smallbtn alt">Guide</span></div></div>
+          <div class="warn" style="font-size:10px;margin-top:16px;padding:10px"><strong>Important Warning</strong><br/>Connect the sensor before starting the application.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>Android Companion</span><span>04</span></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-note="این مهم است: package_name را در داشبورد خودمان ثبت می‌کنیم. اندروید همان package name را روی دستگاه بررسی می‌کند. اگر وجود داشت Open و اگر نبود Install نمایش می‌دهیم.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">App detection</div>
+    <h2>How the app knows what is installed</h2>
+    <div class="code" style="margin-top:26px">Application: ECG Monitor
+Package name: com.otofarma.ecg</div>
+    <div class="flow">
+      <div class="node"><strong>1. Backend sends package name</strong><span>Configured by admin</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><strong>2. Android checks the device</strong><span>Is this package installed?</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><strong>3. UI changes automatically</strong><span>Open / Install</span></div>
+    </div>
+    <div class="grid2" style="margin-top:26px">
+      <div class="card"><span class="pill green">Installed</span><h3 style="margin-top:12px">Open application</h3><p>The companion launches the installed app directly.</p></div>
+      <div class="card"><span class="pill amber">Not installed</span><h3 style="margin-top:12px">Install application</h3><p>The companion shows an installation action or store link.</p></div>
+    </div>
+    <div class="footer"><span>Package-based detection</span><span>05</span></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-note="اینجا نشان بده که محتوا از خود APK جداست. شرکت می‌تواند بدون انتشار نسخه جدید، متن، عکس، ویدیو، مشکلات و هشدارها را از پنل تغییر دهد.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">Content management</div>
+    <h2>Guides can be updated without releasing a new APK</h2>
+    <div class="grid4" style="margin-top:30px">
+      <div class="card"><div class="icon">O</div><h3>Overview</h3><p>What the app/device does and required hardware.</p></div>
+      <div class="card"><div class="icon teal">1</div><h3>Setup</h3><p>Step-by-step preparation and connection instructions.</p></div>
+      <div class="card"><div class="icon">▶</div><h3>Usage</h3><p>How to operate the app and device correctly.</p></div>
+      <div class="card"><div class="icon amber">?</div><h3>Problems</h3><p>Troubleshooting for common issues.</p></div>
+    </div>
+    <div class="grid2" style="margin-top:24px">
+      <div class="card"><h3>Media</h3><p>Multiple images and videos can be attached to guide sections.</p><div style="margin-top:14px"><span class="pill">Photos</span><span class="pill">Videos</span><span class="pill">Thumbnails</span></div></div>
+      <div class="card"><h3>Important Warnings</h3><p>Critical warnings can be published and shown prominently inside the Android app.</p><div style="margin-top:14px"><span class="pill amber">High priority</span><span class="pill gray">Active / Inactive</span></div></div>
+    </div>
+    <div class="footer"><span>Dynamic content</span><span>06</span></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-note="این اسلاید برای نقش‌هاست. مثلا تکنسین اپ‌های بیشتری ببیند و یک کاربر معمولی فقط اپ‌های لازم خودش را. لازم نیست الان دسترسی خیلی پیچیده بسازیم، فقط Role to Application برای MVP کافی است.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">Users & roles</div>
+    <h2>Different users can see different applications</h2>
+    <div class="grid3" style="margin-top:30px">
+      <div class="card"><div class="icon">U</div><h3>User</h3><p>Signs in to the Android companion and receives the correct configuration.</p></div>
+      <div class="card"><div class="icon teal">R</div><h3>Role</h3><p>Defines the user's type, for example Admin, Technician, Doctor or Pharmacy.</p></div>
+      <div class="card"><div class="icon amber">A</div><h3>Application access</h3><p>Each role is assigned a list of applications it is allowed to see.</p></div>
+    </div>
+    <div class="mock" style="margin-top:26px">
+      <div class="mockbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div style="padding:18px 24px">
+        <div class="minirow" style="font-weight:800;color:var(--muted)"><span>Application</span><span>Technician</span><span>Doctor</span><span>Support</span></div>
+        <div class="minirow"><strong>ECG Monitor</strong><span>✓ Allowed</span><span>✓ Allowed</span><span>—</span></div>
+        <div class="minirow"><strong>Remote Support</strong><span>✓ Allowed</span><span>—</span><span>✓ Allowed</span></div>
+        <div class="minirow"><strong>Device Diagnostics</strong><span>✓ Allowed</span><span>—</span><span>—</span></div>
+      </div>
+    </div>
+    <div class="footer"><span>Role-based access</span><span>07</span></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-note="اینجا داشبورد وب را معرفی کن. بگو این داشبورد مرکز مدیریت سیستم است و مدیر از اینجا اپ‌ها، کاربران، نقش‌ها و محتوا را کنترل می‌کند.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">Web Admin Dashboard</div>
+    <h2>The control center for the whole platform</h2>
+    <div class="mock" style="margin-top:26px">
+      <div class="mockbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+      <div class="mockbody">
+        <div class="sidebar">
+          <div style="font-weight:800;font-size:18px;margin:4px 8px 18px">Otofarma</div>
+          <div class="sideitem active">Dashboard</div>
+          <div class="sideitem">Applications</div>
+          <div class="sideitem">Users</div>
+          <div class="sideitem">Roles & Access</div>
+          <div class="sideitem">Content</div>
+        </div>
+        <div class="content">
+          <div style="font-size:22px;font-weight:800">Applications</div>
+          <div style="font-size:12px;color:var(--muted);margin:5px 0 16px">Control the apps available in the companion.</div>
+          <div class="minirow" style="font-weight:800;color:var(--muted)"><span>Application</span><span>Package name</span><span>Status</span><span>Roles</span></div>
+          <div class="minirow"><strong>ECG Monitor</strong><span>com.otofarma.ecg</span><span style="color:var(--green)">Active</span><span>3 roles</span></div>
+          <div class="minirow"><strong>SpO₂ Monitor</strong><span>com.otofarma.spo2</span><span style="color:var(--green)">Active</span><span>3 roles</span></div>
+          <div class="minirow"><strong>Remote Support</strong><span>com.remote.support</span><span style="color:#b45309">Draft</span><span>2 roles</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>Administration</span><span>08</span></div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-note="این همان چیزی است که دفعه قبل جا افتاده بود: فقط لیست Applications کافی نیست. فرایند Add Application هم باید طراحی و پیاده‌سازی شود. این فرم نمونه فیلدهای MVP را نشان می‌دهد.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">Important user flow</div>
+    <h2>Adding an application must be a complete workflow</h2>
+    <div class="grid2" style="margin-top:24px">
+      <div class="card">
+        <div class="label">Add Application</div>
+        <div class="minicard"><div class="label">Application name</div><strong>ECG Monitor</strong></div>
+        <div class="minicard"><div class="label">Package name</div><code>com.otofarma.ecg</code></div>
+        <div class="minicard"><div class="label">Store URL</div><span style="color:var(--muted)">Google Play / internal source</span></div>
+        <div class="grid2" style="gap:10px;margin-top:10px">
+          <div class="minicard"><div class="label">Status</div><span class="pill green">Active</span></div>
+          <div class="minicard"><div class="label">Minimum version</div><strong>1.4.0</strong></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Visible to roles</h3>
+          <div class="checklist">
+            <div class="check"><div class="tick">✓</div><div>Admin</div></div>
+            <div class="check"><div class="tick">✓</div><div>Technician</div></div>
+            <div class="check"><div class="tick">✓</div><div>Doctor</div></div>
+            <div class="check later"><div class="tick">—</div><div>Pharmacy</div></div>
+            <div class="check later"><div class="tick">—</div><div>Support</div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <h3>After creation</h3>
+          <p>The app becomes manageable from the dashboard and can receive guides, warnings, images and videos.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>Add / Edit flow</span><span>09</span></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-note="این اسلاید بک‌اند را ساده توضیح می‌دهد. لازم نیست وارد جزئیات زیاد بشوی. بگو بک‌اند بین داشبورد و اپ اندروید قرار می‌گیرد و اطلاعات را نگه می‌دارد و کنترل می‌کند.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">Backend architecture</div>
+    <h2>A small backend with a clear responsibility</h2>
+    <div class="arch">
+      <div class="archbox big"><div class="icon teal" style="margin:0 auto 12px">W</div><h3>Web Dashboard</h3><p>Admin writes configuration and content.</p></div>
+      <div class="archarrow">→</div>
+      <div class="archbox big"><div class="icon" style="margin:0 auto 12px">API</div><h3>Backend</h3><p>Authentication, roles, applications, guides, warnings and media metadata.</p></div>
+      <div class="archarrow">→</div>
+      <div class="archbox big"><div class="icon amber" style="margin:0 auto 12px">A</div><h3>Android App</h3><p>Reads only the data allowed for the signed-in user.</p></div>
+    </div>
+    <div class="grid2" style="margin-top:28px">
+      <div class="code">POST /auth/login
+GET  /me
+GET  /me/apps
+
+GET  /apps/{id}/guide
+GET  /apps/{id}/warnings
+GET  /apps/{id}/problems</div>
+      <div class="card">
+        <h3>Core data</h3>
+        <p style="margin-bottom:12px">For the MVP we only need a small model:</p>
+        <div><span class="pill">User</span><span class="pill">Role</span><span class="pill">Application</span><span class="pill">GuideSection</span><span class="pill">Media</span><span class="pill">Warning</span><span class="pill">Problem</span></div>
+      </div>
+    </div>
+    <div class="footer"><span>Backend/API</span><span>10</span></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-note="این اسلاید scope را کنترل می‌کند. بگو الان MVP ساده می‌سازیم و از اضافه کردن قابلیت‌های زیاد جلوگیری می‌کنیم، ولی معماری طوری است که بعدها AI، آنالیتیکس و مدیریت دستگاه اضافه شود.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">MVP scope</div>
+    <h2>Build the useful core first — expand later</h2>
+    <div class="grid2" style="margin-top:28px">
+      <div class="card">
+        <h3 style="color:var(--green)">Build now</h3>
+        <div class="checklist">
+          <div class="check"><div class="tick">✓</div><div>Android login and app list</div></div>
+          <div class="check"><div class="tick">✓</div><div>Installed app detection</div></div>
+          <div class="check"><div class="tick">✓</div><div>Guides, media and warnings</div></div>
+          <div class="check"><div class="tick">✓</div><div>Users and roles</div></div>
+          <div class="check"><div class="tick">✓</div><div>Web administration dashboard</div></div>
+          <div class="check"><div class="tick">✓</div><div>Backend API and database</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--blue)">Possible later</h3>
+        <div class="checklist later">
+          <div class="check"><div class="tick">+</div><div>AI assistant / RAG over manuals</div></div>
+          <div class="check"><div class="tick">+</div><div>Device management</div></div>
+          <div class="check"><div class="tick">+</div><div>Analytics and usage reports</div></div>
+          <div class="check"><div class="tick">+</div><div>Notifications and remote configuration</div></div>
+          <div class="check"><div class="tick">+</div><div>Per-device assignments</div></div>
+          <div class="check"><div class="tick">+</div><div>Offline sync and advanced support</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer"><span>MVP first</span><span>11</span></div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-note="در پایان خیلی ساده جمع‌بندی کن: نتیجه یک سیستم قابل مدیریت و قابل توسعه است. بگو مرحله بعدی من می‌تواند نهایی کردن دیتابیس و API و بعد شروع توسعه داشبورد و اپ اندروید باشد.">
+  <div class="topline"></div>
+  <div class="inner">
+    <div class="eyebrow">Implementation plan</div>
+    <h2>What I plan to build</h2>
+    <div class="flow" style="margin-top:44px">
+      <div class="node"><div class="number">01</div><strong>Finalize data model</strong><span>Users, roles, apps, content</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="number">02</div><strong>Backend API</strong><span>Authentication and data delivery</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="number">03</div><strong>Web dashboard</strong><span>Management workflows</span></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="number">04</div><strong>Android app</strong><span>Kotlin + Jetpack Compose</span></div>
+    </div>
+    <div class="card" style="margin-top:38px;text-align:center;padding:30px">
+      <h3 style="font-size:28px">Result</h3>
+      <p style="max-width:850px;margin:8px auto 0">A maintainable platform where Otofarma can control which apps users see, keep instructions up to date, publish important warnings and expand the system over time.</p>
+    </div>
+    <div class="footer"><span>Otofarma Device Companion</span><span>12</span></div>
+  </div>
+</section>
+
+</div>
+
+<div class="notes" id="notes"></div>
+<div class="controls">
+  <button class="secondary" id="notesBtn">Presenter notes</button>
+  <button class="secondary" id="prev">←</button>
+  <button id="next">Next →</button>
+</div>
+<div class="progress" id="progress"></div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let index=0;
+  const progress=document.getElementById('progress');
+  const notes=document.getElementById('notes');
+
+  function show(i){
+    index=Math.max(0,Math.min(i,slides.length-1));
+    slides.forEach((s,n)=>s.classList.toggle('active',n===index));
+    progress.style.width=((index+1)/slides.length*100)+'%';
+    notes.innerHTML='<strong style="display:block;margin-bottom:7px;color:white">یادداشت ارائه</strong>'+slides[index].dataset.note;
+  }
+  document.getElementById('next').onclick=()=>show(index+1);
+  document.getElementById('prev').onclick=()=>show(index-1);
+  document.getElementById('notesBtn').onclick=()=>notes.classList.toggle('show');
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)) show(index+1);
+    if(['ArrowLeft','PageUp'].includes(e.key)) show(index-1);
+    if(e.key.toLowerCase()==='n') notes.classList.toggle('show');
+    if(e.key.toLowerCase()==='f' && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+  });
+  show(0);
+</script>
+</body>
+</html>
